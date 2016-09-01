@@ -234,14 +234,20 @@ class acf_field_recaptcha extends acf_field {
 	
 	
 	
-	function validate_value( $valid, $value, $field, $input ){
-		if (!strlen($value)) return false;
+  function validate_value( $valid, $value, $field, $input ){
+    if (!strlen($value)) return false;
 
-		$api = new \ReCaptcha\ReCaptcha($field['secret_key']);
-		$response = $api->verify($value, $_SERVER['REMOTE_ADDR']);
-		return $response->isSuccess();
-	}
-	
+    $api = new \ReCaptcha\ReCaptcha($field['secret_key']);
+    $response = $api->verify($value, $_SERVER['REMOTE_ADDR']);
+    if ( $response->isSuccess() ) return $valid;
+    
+    $errors = $response->getErrorCodes();
+    if ( empty( $errors ) ) return $valid;
+
+    // For debug purpose
+    // return 'Invalid reCaptcha value, response->isSuccess(): ' . ($response->isSuccess() ? 'true' : 'false' ) . ' errors: ' . json_encode($errors);
+    return false;
+  }
 	
 }
 
